@@ -1,5 +1,35 @@
-"""LangChain integration for Diffbot."""
+"""LangChain integration for Diffbot.
 
-from langchain_diffbot.retrievers import DiffbotKnowledgeGraphRetriever
+Thin layer over the official `diffbot-python` SDK. Every public class accepts
+either a `diffbot_api_token` (or `DIFFBOT_API_TOKEN` env var) or a pre-built
+`diffbot.Diffbot` / `diffbot.DiffbotAsync` client via the `client` /
+`async_client` fields — anything the SDK can do, you can do via these classes.
+"""
 
-__all__ = ["DiffbotKnowledgeGraphRetriever"]
+from langchain_diffbot.chat_models import ChatDiffbot
+from langchain_diffbot.document_loaders import (
+    DiffbotCrawlLoader,
+    DiffbotExtractLoader,
+)
+from langchain_diffbot.retrievers import (
+    DiffbotKnowledgeGraphRetriever,
+    DiffbotWebSearchRetriever,
+)
+from langchain_diffbot.tools import (
+    DiffbotEntitiesTool,
+    DiffbotExtractTool,
+    DiffbotKnowledgeGraphTool,
+    DiffbotWebSearchTool,
+)
+
+__all__ = [
+    "ChatDiffbot",
+    "DiffbotCrawlLoader",
+    "DiffbotEntitiesTool",
+    "DiffbotExtractLoader",
+    "DiffbotExtractTool",
+    "DiffbotKnowledgeGraphRetriever",
+    "DiffbotKnowledgeGraphTool",
+    "DiffbotWebSearchRetriever",
+    "DiffbotWebSearchTool",
+]

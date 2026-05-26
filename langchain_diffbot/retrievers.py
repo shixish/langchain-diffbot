@@ -1,4 +1,4 @@
-"""Diffbot retrievers — Knowledge Graph."""
+"""Diffbot retrievers — Knowledge Graph and Web Search."""
 
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ from langchain_diffbot._base import _BaseDiffbotComponent
 
 DEFAULT_KG_CONTENT_FIELDS: tuple[str, ...] = ("description", "summary", "name")
 """Default ordered priority for selecting `page_content` from a KG entity."""
+
+DEFAULT_WEB_CONTENT_FIELDS: tuple[str, ...] = ("content", "snippet")
+"""Default ordered priority for selecting `page_content` from a web search result."""
 
 DocumentMapper = Callable[[dict[str, Any]], Document]
 
@@ -217,3 +220,78 @@ class DiffbotKnowledgeGraphRetriever(_BaseDiffbotComponent, BaseRetriever):
             )
             raise TypeError(msg)
         return [self._hit_to_document(h) for h in body.get("data", [])[:k]]
+
+
+class DiffbotWebSearchRetriever(_BaseDiffbotComponent, BaseRetriever):
+    """Retriever backed by Diffbot's web search API.
+
+    The `query` passed to `invoke` is a natural-language search string.
+    Results come back as `Document`s whose `page_content` is the page content
+    (or snippet) returned by Diffbot, with `title`, `pageUrl`, and `score` in
+    `metadata` by default.
+
+    Example:
+        ```python
+        from langchain_diffbot import DiffbotWebSearchRetriever
+
+        retriever = DiffbotWebSearchRetriever(k=5)
+        retriever.invoke("diffbot knowledge graph")
+        ```
+    """
+
+    k: int = 10
+    """Number of results to fetch. Maps to the SDK's `num_results`."""
+
+    max_tokens: int | None = None
+    """Optional cap on total content tokens.
+
+    Passes through to `web_search(max_tokens=...)`.
+    """
+
+    fields: list[str] | None = None
+    """Allowlist of result keys to keep in `metadata`.
+
+    `None` keeps every field. Ignored when `document_mapper` is set.
+    """
+
+    content_fields: list[str] = Field(
+        default_factory=lambda: list(DEFAULT_WEB_CONTENT_FIELDS)
+    )
+    """Ordered priority for selecting `page_content`. First non-empty wins.
+
+    Ignored when `document_mapper` is set.
+    """
+
+    document_mapper: DocumentMapper | None = None
+    """Optional override mapping a raw search result dict to a `Document`."""
+
+    def _hit_to_document(self, hit: dict[str, Any]) -> Document:
+        if self.document_mapper is not None:
+            return self.document_mapper(hit)
+        return _dict_to_document(
+            hit, content_fields=self.content_fields, fields=self.fields
+        )
+
+    def _get_relevant_documents(
+        self,
+        query: str,
+        *,
+        run_manager: CallbackManagerForRetrieverRun,
+        **kwargs: Any,
+    ) -> list[Document]:
+        k = _resolve_k(self.k, kwargs)
+        with self._sync_db() as db:
+            body = db.web_search(query, num_results=k, max_tokens=self.max_tokens)
+        return [self._hit_to_document(h) for h in body.get("search_results", [])[:k]]
+
+    async def _aget_relevant_documents(
+        self,
+        query: str,
+        *,
+        run_manager: AsyncCallbackManagerForRetrieverRun,
+        **kwargs: Any,
+    ) -> list[Document]:
+        k = _resolve_k(self.k, kwargs)
+        async with self._async_db() as db:
+            body = await db.web_search(query, num_results=k, max_tokens=self.max_tokens)
+        return [self._hit_to_document(h) for h in body.get("search_results", [])[:k]]

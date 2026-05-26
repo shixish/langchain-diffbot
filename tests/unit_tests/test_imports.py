@@ -1,6 +1,16 @@
 from langchain_diffbot import __all__
 
-EXPECTED = ["DiffbotKnowledgeGraphRetriever"]
+EXPECTED = [
+    "ChatDiffbot",
+    "DiffbotCrawlLoader",
+    "DiffbotEntitiesTool",
+    "DiffbotExtractLoader",
+    "DiffbotExtractTool",
+    "DiffbotKnowledgeGraphRetriever",
+    "DiffbotKnowledgeGraphTool",
+    "DiffbotWebSearchRetriever",
+    "DiffbotWebSearchTool",
+]
 
 
 def test_all_imports() -> None:
