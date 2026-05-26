@@ -104,6 +104,19 @@ chain = (
 chain.invoke('type:Organization location.city.name:"Boston" industries:"Biotech"')
 ```
 
+## Examples
+
+The [`examples/`](./examples) folder has runnable demos:
+
+- [`examples/quickstart.ipynb`](./examples/quickstart.ipynb) — notebook covering the retriever, output shaping, async, and a Claude-powered research agent.
+- [`examples/company_research/`](./examples/company_research) — the same agent as a one-shot CLI: `cd examples && python -m company_research "your question"`.
+
+Both need `langchain` + `langchain-anthropic` on top of the base package. Install the extra:
+
+```bash
+pip install "langchain-diffbot[examples]"
+```
+
 ## Development
 
 ```bash
