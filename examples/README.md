@@ -4,7 +4,13 @@ Two ways to see the package in action. Both expect `DIFFBOT_API_TOKEN` and (for 
 
 ## Install
 
-Until `diffbot-python` is published to PyPI it has to be installed from GitHub alongside the LangChain extras:
+From inside this repo (the common case — `[tool.uv.sources]` already points `diffbot-python` at its GitHub source):
+
+```bash
+uv sync --extra examples
+```
+
+From outside the repo (e.g. after `langchain-diffbot` is published to PyPI) you'd install both explicitly since `diffbot-python` isn't on PyPI yet:
 
 ```bash
 pip install \
@@ -26,11 +32,15 @@ pip install \
 8. A multi-tool research agent that uses KG search + web search + URL extract
 
 ```bash
+# uv-managed (recommended — handles PATH automatically):
+uv run --with jupyter jupyter lab examples/quickstart.ipynb
+
+# Or plain pip (use `python -m jupyter`, not `jupyter`, to avoid PATH issues):
 pip install jupyter
-jupyter lab examples/quickstart.ipynb
+python -m jupyter lab examples/quickstart.ipynb
 ```
 
-The notebook is regenerated from [`_build_notebook.py`](./_build_notebook.py) — edit that file (cell sources are inline) and re-run `python examples/_build_notebook.py` rather than editing the `.ipynb` directly.
+The notebook is regenerated from [`_build_notebook.py`](./_build_notebook.py) — edit that file (cell sources are inline) and re-run `uv run python examples/_build_notebook.py` rather than editing the `.ipynb` directly.
 
 ## CLI
 

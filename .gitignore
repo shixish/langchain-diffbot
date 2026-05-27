@@ -7,6 +7,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .benchmarks/
+.ipynb_checkpoints/
 dist/
 build/
 .env
