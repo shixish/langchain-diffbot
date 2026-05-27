@@ -2,24 +2,59 @@
 
 Two ways to see the package in action. Both expect `DIFFBOT_API_TOKEN` and (for the agent code) `ANTHROPIC_API_KEY` in the environment — copy `.env.example` to `.env` and fill in the values, or `export` them in your shell.
 
-## Notebook
+## Install
 
-`quickstart.ipynb` walks through the retriever (basic + output shaping + async) and then builds a Claude-powered research agent on top of it.
+Until `diffbot-python` is published to PyPI it has to be installed from GitHub alongside the LangChain extras:
 
 ```bash
-pip install "langchain-diffbot[examples]" jupyter
+pip install \
+    "diffbot-python @ git+https://github.com/diffbot/diffbot-python" \
+    "langchain-diffbot[examples]"
+```
+
+## Notebook
+
+[`quickstart.ipynb`](./quickstart.ipynb) is a full tour of the package:
+
+1. Knowledge Graph retriever + output shaping
+2. Native async
+3. Web Search retriever
+4. Extract tool + extract loader
+5. Entities tool
+6. ChatDiffbot (Diffbot's own LLM with native streaming)
+7. Bring-your-own SDK client
+8. A multi-tool research agent that uses KG search + web search + URL extract
+
+```bash
+pip install jupyter
 jupyter lab examples/quickstart.ipynb
 ```
 
+The notebook is regenerated from [`_build_notebook.py`](./_build_notebook.py) — edit that file (cell sources are inline) and re-run `python examples/_build_notebook.py` rather than editing the `.ipynb` directly.
+
 ## CLI
 
-`company_research/` is the same agent as a one-shot CLI. Useful for shell scripting or quick spot checks.
+[`company_research/`](./company_research) is the same multi-tool agent packaged as a one-shot CLI. Useful for shell scripting or quick spot checks.
 
 ```bash
-pip install "langchain-diffbot[examples]"
 cd examples
 python -m company_research "What companies in Austin work on robotics?"
 python -m company_research --quiet "Who are the executives at Diffbot?"
+python -m company_research "What did Diffbot announce most recently?"
 ```
 
-The agent picks its own DQL queries, iterates if the first one is too broad or too narrow, and cites entity IDs in the answer. Drop `--quiet` to see tool calls and intermediate KG responses.
+The agent has three tools:
+
+- `search_kg(dql_query)` — Knowledge Graph search
+- `web_search(query)` — natural-language web search
+- `extract_url(url)` — fetch and read a single page
+
+It picks its own approach, may iterate, and cites the entity IDs / URLs it used. Drop `--quiet` to see the tool calls and intermediate responses.
+
+### Model
+
+Defaults to `anthropic:claude-haiku-4-5` because a multi-step agent loop on a fresh Anthropic account can blow past Sonnet's 30k input-tokens-per-minute Tier 1 limit. Override with:
+
+```bash
+COMPANY_RESEARCH_MODEL=anthropic:claude-sonnet-4-6 python -m company_research "..."
+```

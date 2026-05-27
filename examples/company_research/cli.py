@@ -11,14 +11,12 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from company_research.agent import build_agent
 
 
-def _format_event(message) -> str | None:  # noqa: ANN001
+def _format_event(message) -> str | None:
     if isinstance(message, ToolMessage):
         return f"  ↳ tool {message.name}: {str(message.content)[:200]}..."
     if isinstance(message, AIMessage):
         if message.tool_calls:
-            calls = ", ".join(
-                f"{c['name']}({c['args']})" for c in message.tool_calls
-            )
+            calls = ", ".join(f"{c['name']}({c['args']})" for c in message.tool_calls)
             return f"  ▸ calling: {calls}"
         if isinstance(message.content, str) and message.content.strip():
             return f"\n{message.content}"
@@ -48,13 +46,13 @@ def main() -> int:
     if args.quiet:
         final = messages[-1]
         if isinstance(final, AIMessage) and isinstance(final.content, str):
-            print(final.content)  # noqa: T201
+            print(final.content)
         return 0
 
     for msg in messages[1:]:  # skip the human prompt
         rendered = _format_event(msg)
         if rendered:
-            print(rendered)  # noqa: T201
+            print(rendered)
     return 0
 
 

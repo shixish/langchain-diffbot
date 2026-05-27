@@ -80,6 +80,11 @@ convention = "google"
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/**/*.py" = ["D", "S101"]
+# Examples are demos, not library code: looser docstring rules. Notebook
+# cell sources also routinely run over 88 chars (URLs, prose). The notebook
+# builder script holds notebook cell sources as long inline strings.
+"examples/**/*.py" = ["D", "E501"]
+"examples/**/*.ipynb" = ["D", "E501", "I001"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers --strict-config"
